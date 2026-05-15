@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Voice Recorder</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+
+<body>
+
+  <h1>Voice Recorder</h1>
+
+  <div id="controls">
+    <button id="startBtn">Start Recording</button>
+    <button id="stopBtn" disabled>Stop Recording</button>
+  </div>
+
+  <p id="status">Status: Idle</p>
+
+  <audio id="playback" controls></audio>
+  <a id="downloadLink" download="recording.webm" hidden>Download recording</a>
+
+  <div id="result">
+    <p><strong>You:</strong> <span id="userText">-</span></p>
+    <p><strong>AI:</strong> <span id="aiText">-</span></p>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,55 @@
+body {
+  font-family: sans-serif;
+  padding: 40px;
+}
+
+h1 {
+  margin-bottom: 24px;
+}
+
+#controls {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+button {
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+#status {
+  font-size: 16px;
+}
+
+#playback {
+  display: block;
+  margin-top: 20px;
+  width: 100%;
+  max-width: 420px;
+}
+
+#downloadLink {
+  display: inline-block;
+  margin-top: 12px;
+}
+
+#downloadLink[hidden] {
+  display: none;
+}
+
+#result {
+  margin-top: 24px;
+  max-width: 680px;
+  line-height: 1.5;
+}
+
+#result p {
+  margin: 8px 0;
+}

@@ -1,0 +1,7 @@
+FastAPI
+uvicorn
+python-dotenv
+pydantic
+python-multipart
+faster-whisper
+google-genai
