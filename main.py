@@ -7,14 +7,16 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.services.gemini import GeminiError, generate_ai_reply
+from backend.services.gemini import GeminiError, GeminiQuotaError, generate_ai_reply
 from backend.services.transcription import TranscriptionError, transcribe_audio_file
+from backend.services.tts import TTSError, generate_reply_audio
 
 
 app = FastAPI()
 UPLOAD_DIR = Path("temp")
 logger = logging.getLogger(__name__)
 FRONTEND_DIR = Path("frontend")
+AUDIO_DIR = Path("audio")
 
 app.add_middleware(
     CORSMiddleware,
@@ -25,6 +27,7 @@ app.add_middleware(
 
 
 app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
+app.mount("/audio", StaticFiles(directory=AUDIO_DIR), name="audio")
 
 
 @app.get("/")
@@ -62,9 +65,26 @@ async def upload_audio(request: Request):
 
     try:
         reply = generate_ai_reply(transcript)
+    except GeminiQuotaError as exc:
+        logger.warning("Gemini quota exhausted for %s", saved_path)
+        raise HTTPException(
+            status_code=429,
+            detail={
+                "message": str(exc),
+                "transcript": transcript,
+                "saved_as": str(saved_path),
+            },
+        ) from exc
     except GeminiError as exc:
         logger.exception("Gemini reply failed for %s", saved_path)
         raise HTTPException(status_code=502, detail=str(exc)) from exc
+
+    try:
+        reply_audio_path = await generate_reply_audio(reply)
+    except TTSError as exc:
+        logger.exception("TTS failed for %s", saved_path)
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+    audio_url = f"/{reply_audio_path.as_posix()}"
 
     return {
         "success": True,
@@ -74,4 +94,6 @@ async def upload_audio(request: Request):
         "saved_as": str(saved_path),
         "transcript": transcript,
         "reply": reply,
+        "audio_path": str(reply_audio_path),
+        "audio_url": audio_url,
     }

@@ -27,7 +27,7 @@ def test_gemini_connection() -> str:
 
     client = genai.Client()
     response = client.models.generate_content(
-        model="gemini-2.5-flash",
+        model="gemini-1.5-flash",
         contents="hello",
     )
 
@@ -44,7 +44,7 @@ def test_personality_manually() -> list[tuple[str, str]]:
     client = genai.Client()
     questions = "\n".join(f"{index}. {question}" for index, question in enumerate(TEST_QUESTIONS, start=1))
     response = client.models.generate_content(
-        model="gemini-2.5-flash",
+        model="gemini-1.5-flash",
         contents=(
             f"{personality}\n\n"
             "Answer each test question in order using this exact format:\n"

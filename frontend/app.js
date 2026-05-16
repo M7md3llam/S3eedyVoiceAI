@@ -5,9 +5,13 @@ const playback = document.getElementById('playback');
 const downloadLink = document.getElementById('downloadLink');
 const userText = document.getElementById('userText');
 const aiText = document.getElementById('aiText');
+const aiPlayback = document.getElementById('aiPlayback');
+const backendOrigin = window.location.protocol === 'file:'
+  ? 'http://localhost:8000'
+  : window.location.origin;
 const uploadUrl = window.location.protocol !== 'file:'
   ? '/api/upload'
-  : 'http://localhost:8000/api/upload';
+  : backendOrigin + '/api/upload';
 
 let mediaRecorder = null;
 let audioChunks = [];
@@ -53,6 +57,8 @@ startBtn.addEventListener('click', async () => {
     downloadLink.hidden = true;
     userText.textContent = '-';
     aiText.textContent = '-';
+    aiPlayback.removeAttribute('src');
+    aiPlayback.load();
 
     const mimeType = MediaRecorder.isTypeSupported('audio/webm')
       ? 'audio/webm'
@@ -127,10 +133,33 @@ async function sendToBackend(blob) {
       const result = await response.json();
       userText.textContent = result.transcript || '-';
       aiText.textContent = result.reply || '-';
-      setStatus('Done.');
+
+      if (!result.audio_url) {
+        setStatus('Done. AI reply text received, but no audio URL returned.');
+        return;
+      }
+
+      const audioUrl = new URL(result.audio_url, backendOrigin).href;
+      aiPlayback.src = audioUrl;
+
+      try {
+        await aiPlayback.play();
+        setStatus('Done. AI reply is playing.');
+      } catch (playErr) {
+        setStatus('Done. Tap play to hear the AI reply.');
+        console.warn('Autoplay blocked:', playErr.message);
+      }
     } else {
       const error = await response.json().catch(() => null);
-      setStatus('Recording ready. Upload failed: ' + (error?.detail || response.status));
+      const detail = error?.detail;
+
+      if (response.status === 429 && detail?.transcript) {
+        userText.textContent = detail.transcript;
+        aiText.textContent = '-';
+        setStatus('Gemini quota reached. Try again later.');
+      } else {
+        setStatus('Recording ready. Upload failed: ' + (detail?.message || detail || response.status));
+      }
     }
   } catch (err) {
     setStatus('Recording ready. Backend not reachable.');

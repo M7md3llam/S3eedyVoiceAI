@@ -28,7 +28,8 @@ button:disabled {
   font-size: 16px;
 }
 
-#playback {
+#playback,
+#aiPlayback {
   display: block;
   margin-top: 20px;
   width: 100%;
