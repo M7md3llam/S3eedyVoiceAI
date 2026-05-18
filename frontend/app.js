@@ -3,8 +3,7 @@ const stopBtn = document.getElementById('stopBtn');
 const status = document.getElementById('status');
 const playback = document.getElementById('playback');
 const downloadLink = document.getElementById('downloadLink');
-const userText = document.getElementById('userText');
-const aiText = document.getElementById('aiText');
+const conversationDiv = document.getElementById('conversation');
 const aiPlayback = document.getElementById('aiPlayback');
 const backendOrigin = window.location.protocol === 'file:'
   ? 'http://localhost:8000'
@@ -16,9 +15,39 @@ const uploadUrl = window.location.protocol !== 'file:'
 let mediaRecorder = null;
 let audioChunks = [];
 let recordingUrl = null;
+const conversation = [];
 
 function setStatus(msg) {
   status.textContent = 'Status: ' + msg;
+}
+
+function addMessage(role, text) {
+  if (!text) return;
+
+  conversation.push({ role, text });
+  renderConversation();
+}
+
+function renderConversation() {
+  conversationDiv.innerHTML = '';
+
+  conversation.forEach((msg) => {
+    const bubble = document.createElement('div');
+    bubble.className = 'message ' + (msg.role === 'user' ? 'user-message' : 'ai-message');
+
+    const label = document.createElement('div');
+    label.className = 'message-label';
+    label.textContent = msg.role === 'user' ? 'You' : 'AI';
+
+    const text = document.createElement('div');
+    text.className = 'message-text';
+    text.textContent = msg.text;
+
+    bubble.append(label, text);
+    conversationDiv.appendChild(bubble);
+  });
+
+  conversationDiv.scrollTop = conversationDiv.scrollHeight;
 }
 
 startBtn.addEventListener('click', async () => {
@@ -55,8 +84,6 @@ startBtn.addEventListener('click', async () => {
     playback.load();
     downloadLink.removeAttribute('href');
     downloadLink.hidden = true;
-    userText.textContent = '-';
-    aiText.textContent = '-';
     aiPlayback.removeAttribute('src');
     aiPlayback.load();
 
@@ -131,8 +158,8 @@ async function sendToBackend(blob) {
 
     if (response.ok) {
       const result = await response.json();
-      userText.textContent = result.transcript || '-';
-      aiText.textContent = result.reply || '-';
+      addMessage('user', result.transcript);
+      addMessage('ai', result.reply);
 
       if (!result.audio_url) {
         setStatus('Done. AI reply text received, but no audio URL returned.');
@@ -154,8 +181,7 @@ async function sendToBackend(blob) {
       const detail = error?.detail;
 
       if (response.status === 429 && detail?.transcript) {
-        userText.textContent = detail.transcript;
-        aiText.textContent = '-';
+        addMessage('user', detail.transcript);
         setStatus('Gemini quota reached. Try again later.');
       } else {
         setStatus('Recording ready. Upload failed: ' + (detail?.message || detail || response.status));

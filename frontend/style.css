@@ -45,12 +45,44 @@ button:disabled {
   display: none;
 }
 
-#result {
+#conversation {
   margin-top: 24px;
   max-width: 680px;
+  max-height: 360px;
+  overflow-y: auto;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fafafa;
   line-height: 1.5;
 }
 
-#result p {
-  margin: 8px 0;
+.message {
+  width: fit-content;
+  max-width: 82%;
+  margin: 10px 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+}
+
+.user-message {
+  margin-left: auto;
+  background: #dff0ff;
+}
+
+.ai-message {
+  margin-right: auto;
+  background: #fff;
+  border: 1px solid #e2e2e2;
+}
+
+.message-label {
+  margin-bottom: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #555;
+}
+
+.message-text {
+  white-space: pre-wrap;
 }
