@@ -67,8 +67,13 @@ async def root():
 @app.post("/api/upload")
 async def upload_audio(request: Request):
     content_length = request.headers.get("content-length")
-    if content_length and int(content_length) > MAX_AUDIO_SIZE_BYTES:
-        raise HTTPException(status_code=413, detail="Audio file exceeds the 25 MB limit.")
+    if content_length:
+        try:
+            declared_size = int(content_length)
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail="Invalid Content-Length header.") from exc
+        if declared_size > MAX_AUDIO_SIZE_BYTES:
+            raise HTTPException(status_code=413, detail="Audio file exceeds the 25 MB limit.")
 
     try:
         form = await request.form()
