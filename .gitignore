@@ -1,2 +1,7 @@
 .env
 .venv/
+temp/
+audio/replies/
+__pycache__/
+*.py[cod]
+.DS_Store
