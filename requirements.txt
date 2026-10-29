@@ -1,4 +1,4 @@
-FastAPI
+fastapi
 uvicorn
 python-dotenv
 pydantic
@@ -6,4 +6,4 @@ python-multipart
 faster-whisper
 google-genai
 edge-tts
-OpenRouter
+requests
